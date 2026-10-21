@@ -55,6 +55,54 @@
       </div>
       <div id="result-container"></div>
     </section>
+
+    <!-- Multi-Drug Prescription List Dock (Step 13) -->
+    <aside id="cart-dock" class="cart-dock hidden" role="region" aria-label="Prescription List Summary">
+      <div class="cart-dock-info">
+        <span id="cart-count-badge" class="cart-badge">0</span>
+        <div class="cart-dock-text">
+          <strong id="cart-dock-savings">Save ₹0</strong>
+          <span id="cart-dock-sub">View list & savings</span>
+        </div>
+      </div>
+      <button id="view-cart-btn" class="cart-dock-btn" aria-label="View Medicine List">
+        📋 <span data-i18n="myListTitle">My Medicine List</span>
+      </button>
+    </aside>
+
+    <!-- Cart / Prescription List Modal Drawer -->
+    <div id="cart-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="cart-modal-title">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="cart-modal-title" data-i18n="myListTitle">My Medicine List</h2>
+          <button id="close-cart-btn" class="close-modal-btn" aria-label="Close">✕</button>
+        </div>
+
+        <div id="cart-summary-card" class="savings-banner">
+          <div class="savings-headline">
+            <span id="cart-total-brand" class="savings-old-price">₹0</span>
+            <span class="savings-arrow">→</span>
+            <span id="cart-total-generic" class="savings-new-price">₹0</span>
+          </div>
+          <div id="cart-total-badge" class="savings-badge-pill">
+            ⚡ TOTAL SAVINGS: ₹0 (0%)
+          </div>
+        </div>
+
+        <div id="cart-items-container" class="cart-items-list">
+          <!-- Populated by JavaScript -->
+        </div>
+
+        <div class="cart-modal-actions">
+          <button id="print-slip-btn" class="action-btn print-btn">
+            🖨️ <span data-i18n="printSlipBtn">Print Prescription Slip</span>
+          </button>
+          <button id="clear-cart-btn" class="action-btn clear-list-btn" data-i18n="clearListBtn">
+            Clear List
+          </button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script type="module" src="js/app.js"></script>

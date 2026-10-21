@@ -458,8 +458,257 @@ button:active {
   border-top: 1px dashed rgba(245, 158, 11, 0.3);
 }
 
-/* =========================================================
-   Mobile Ergonomics & 360px Breakpoint Optimization
+/* Add to List Button in Result Card */
+.add-to-cart-btn {
+  min-height: 52px;
+  width: 100%;
+  background: var(--accent-blue);
+  color: #0f172a;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+}
+
+.add-to-cart-btn.added {
+  background: var(--accent-green);
+  color: #064e3b;
+}
+
+/* Cart Dock Bar */
+.cart-dock {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 500px;
+  background: #1e293b;
+  border: 2px solid var(--accent-green);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  z-index: 50;
+}
+
+.cart-dock.hidden {
+  display: none;
+}
+
+.cart-dock-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cart-badge {
+  background: var(--accent-green);
+  color: #064e3b;
+  font-weight: 900;
+  font-size: 1.1rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-dock-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-dock-text strong {
+  color: var(--accent-green);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.cart-dock-text span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.cart-dock-btn {
+  min-height: 44px;
+  padding: 8px 16px;
+  background: var(--accent-green);
+  color: #064e3b;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: 0;
+}
+
+.modal-overlay.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #0f172a;
+  border: 2px solid var(--accent-blue);
+  border-bottom: none;
+  border-radius: 20px 20px 0 0;
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  padding: 18px 16px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+.modal-header h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.close-modal-btn {
+  width: 44px;
+  height: 44px;
+  background: #334155;
+  color: #ffffff;
+  border: none;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Cart Items List */
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 38vh;
+  overflow-y: auto;
+}
+
+.cart-item-row {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cart-item-name {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: #ffffff;
+}
+
+.cart-item-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.cart-item-prices {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.cart-item-saving {
+  color: var(--accent-green);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.cart-item-remove-btn {
+  min-width: 40px;
+  min-height: 40px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid var(--accent-red);
+  color: #fca5a5;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.action-btn {
+  min-height: 50px;
+  border-radius: var(--radius-md);
+  font-size: 1.05rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.print-btn {
+  flex: 2;
+  background: var(--accent-green);
+  color: #064e3b;
+}
+
+.clear-list-btn {
+  flex: 1;
+  background: #334155;
+  color: #f8fafc;
+  border: 1px solid #475569;
+}
+
+/* Mobile Ergonomics & 360px Breakpoint Optimization
    Designed for one-handed use, no horizontal scrolling
    ========================================================= */
 
