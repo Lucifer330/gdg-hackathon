@@ -7,6 +7,7 @@ const path = require('path');
 const TEST_FILES = [
   'csv.test.js',
   'data_and_exact.test.js',
+  'banner.test.js',
   'normalization.test.js',
   'search.test.js',
   'i18n.test.js',
