@@ -10,9 +10,14 @@ const PRECACHE_ASSETS = [
   './index.html',
   './manifest.webmanifest',
   './css/styles.css',
-  './js/app.js',
+  './css/print.css',
+  './js/config.js',
+  './js/i18n.js',
   './js/data.js',
   './js/search.js',
+  './js/cart.js',
+  './js/vision.js',
+  './js/app.js',
   './icons/icon-192.svg',
   './icons/icon-512.svg',
   './data/drugs.sample.csv'
@@ -20,12 +25,7 @@ const PRECACHE_ASSETS = [
 
 // Optional assets that may or may not exist at install time
 const OPTIONAL_ASSETS = [
-  './data/drugs.csv',
-  './css/print.css',
-  './js/i18n.js',
-  './js/cart.js',
-  './js/vision.js',
-  './js/config.js'
+  './data/drugs.csv'
 ];
 
 self.addEventListener('install', (event) => {
