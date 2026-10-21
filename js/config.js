@@ -5,9 +5,9 @@
  */
 
 export const CONFIG = {
-  // Default to local Ollama instance running Gemma 4
+  // Default to local Ollama instance running Gemma 4 (gemma4:e4b)
   VISION_ENDPOINT: 'http://localhost:11434/api/generate',
-  VISION_MODEL: 'gemma-4',
+  VISION_MODEL: 'gemma4:e4b',
   
   // Timeout in milliseconds for vision inference
   VISION_TIMEOUT_MS: 15000,

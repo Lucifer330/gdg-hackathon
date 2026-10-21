@@ -103,7 +103,7 @@ npx serve .
 Generic Dawa supports reading printed text from packaging using a local **Gemma 4** vision model.
 
 ### Architectural Guardrails
-1. **Model Used**: Gemma 4 vision model (or any local multimodal model served via Ollama).
+1. **Model Used**: `gemma4:e4b` (Ollama model tag `gemma4`, default `gemma4:e4b`).
 2. **Where it Runs**: Local Ollama server (default endpoint: `http://localhost:11434/api/generate`, configurable in `js/config.js`).
 3. **Strict OCR Scope**: The model prompt strictly instructs the model to transcribe printed packaging text only and output `{"candidates": ["..."]}`.
 4. **Hard Security Rule**: Gemma 4 is **never** permitted to supply prices, molecules, strengths, dosages, or substitutions. All medical data comes solely from `data/drugs.csv`.
@@ -112,13 +112,38 @@ Generic Dawa supports reading printed text from packaging using a local **Gemma 
    *"Could not read the photo. Please type the name."*  
    Typing remains the primary path that always works.
 
-### Setting Up Local Ollama for Vision:
-```bash
-# 1. Install Ollama from ollama.com
-# 2. Run vision model
-ollama run gemma-4
+### Setting Up Local Ollama for Vision & Browser CORS:
+By default, web browsers block web app fetch requests to Ollama due to Cross-Origin Resource Sharing (CORS). You must enable CORS:
+
+#### On Windows (PowerShell):
+```powershell
+$env:OLLAMA_ORIGINS="*"
+ollama serve
+# In a separate terminal, pull or run the model:
+ollama run gemma4:e4b
 ```
-*Note: If Ollama is not running, all other app features (search, fuzzy matching, cart, print slip, offline PWA) continue to work normally.*
+
+#### On Linux / macOS:
+```bash
+OLLAMA_ORIGINS="*" ollama serve
+# In a separate terminal:
+ollama run gemma4:e4b
+```
+
+#### For Phone Demos (Connecting from a Phone on the Same Wi-Fi):
+To test on a physical smartphone, configure Ollama to listen on all interfaces:
+```bash
+# Windows PowerShell
+$env:OLLAMA_HOST="0.0.0.0"
+$env:OLLAMA_ORIGINS="*"
+ollama serve
+```
+Then find your laptop's local Wi-Fi IP address (e.g. `192.168.1.15`) and update `js/config.js`:
+```javascript
+VISION_ENDPOINT: 'http://192.168.1.15:11434/api/generate',
+```
+
+*Note: If Ollama is not running, all other app features (search, fuzzy matching, multi-drug list, counter print slip, offline PWA) continue to work normally.*
 
 ---
 
