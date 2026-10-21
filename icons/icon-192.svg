@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="pillGreen192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#16a34a" />
+    </linearGradient>
+    <linearGradient id="pillWhite192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="40" fill="url(#bg192)" stroke="#38bdf8" stroke-width="4" />
+  <g transform="translate(96, 96) rotate(-45) translate(-96, -96)">
+    <path d="M66,66 A30,30 0 0,1 126,66 L126,96 L66,96 Z" fill="url(#pillGreen192)" />
+    <path d="M66,96 L126,96 L126,126 A30,30 0 0,1 66,126 Z" fill="url(#pillWhite192)" />
+    <line x1="66" y1="96" x2="126" y2="96" stroke="#0f172a" stroke-width="3" />
+  </g>
+  <text x="96" y="120" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="900" fill="#0f172a" text-anchor="middle">₹</text>
+</svg>

@@ -36,6 +36,13 @@ async function init() {
   // Setup search input listeners
   searchInput.addEventListener('input', handleSearchInput);
   clearSearchBtn.addEventListener('click', clearSearch);
+
+  // Register Service Worker for offline-first PWA
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Generic Dawa SW registered:', reg.scope))
+      .catch(err => console.warn('SW registration skipped/failed:', err));
+  }
 }
 
 function clearSearch() {
