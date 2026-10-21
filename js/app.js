@@ -172,52 +172,53 @@ function buildResultCardHTML(drug) {
   // Hard Rule 3: Always show disclaimer on result screen in Hindi and English
   return `
     <article class="result-card" role="region" aria-label="Medicine Comparison">
+      <!-- Huge Saving Headline at Top -->
       <div class="savings-banner">
         <div class="savings-headline">
-          <span class="savings-old-price">₹${drug.brand_price_inr.toFixed(2)}</span>
-          <span>→</span>
-          <span>₹${drug.generic_price_inr.toFixed(2)}</span>
+          <span class="savings-old-price" aria-label="Branded Price">₹${drug.brand_price_inr.toFixed(2)}</span>
+          <span class="savings-arrow">→</span>
+          <span class="savings-new-price" aria-label="Jan Aushadhi Price">₹${drug.generic_price_inr.toFixed(2)}</span>
         </div>
-        <div class="savings-summary">
-          Save ₹${drug.savings_inr.toFixed(2)} (${drug.savings_pct}%)
+        <div class="savings-badge-pill">
+          ⚡ SAVE ₹${drug.savings_inr.toFixed(2)} (${drug.savings_pct}%)
         </div>
       </div>
 
+      <!-- Medicine Identification -->
+      <div class="drug-header-block">
+        <h2 class="drug-main-title">${escapeHTML(drug.brand_name)}</h2>
+        <span class="drug-form-tag">${escapeHTML(drug.strength)} • ${escapeHTML(drug.form)}</span>
+      </div>
+
+      <!-- Key Details Grid -->
       <div class="drug-details">
         <div class="detail-row">
-          <span class="detail-label">Brand Name</span>
-          <span class="detail-value">${escapeHTML(drug.brand_name)}</span>
+          <span class="detail-label">Active Molecule / Salt</span>
+          <span class="detail-value highlight">${escapeHTML(drug.molecule)}</span>
         </div>
         ${drug.brand_manufacturer ? `
         <div class="detail-row">
-          <span class="detail-label">Manufacturer</span>
+          <span class="detail-label">Brand Manufacturer</span>
           <span class="detail-value">${escapeHTML(drug.brand_manufacturer)}</span>
         </div>` : ''}
         <div class="detail-row">
-          <span class="detail-label">Generic Molecule</span>
-          <span class="detail-value">${escapeHTML(drug.molecule)}</span>
+          <span class="detail-label">Jan Aushadhi Generic</span>
+          <span class="detail-value generic-name">${escapeHTML(drug.generic_name)}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">Strength</span>
-          <span class="detail-value">${escapeHTML(drug.strength)}</span>
+          <span class="detail-label">Packaging / Units</span>
+          <span class="detail-value">${escapeHTML(drug.pack_size)}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">Form & Pack</span>
-          <span class="detail-value">${escapeHTML(drug.form)} (${escapeHTML(drug.pack_size)})</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Jan Aushadhi Product</span>
-          <span class="detail-value">${escapeHTML(drug.generic_name)}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Source & Date</span>
-          <span class="detail-value">${escapeHTML(drug.source)} (${escapeHTML(drug.source_date)})</span>
+          <span class="detail-label">Price Source & Date</span>
+          <span class="detail-value source-tag">${escapeHTML(drug.source)} (${escapeHTML(drug.source_date)})</span>
         </div>
       </div>
 
+      <!-- Mandatory Medical Disclaimer (Rule 3) -->
       <div class="disclaimer-box" role="note">
-        <span class="disclaimer-title">⚠️ Important Medical Disclaimer</span>
-        <p>This is price and molecule information only, not medical advice. Do not change any medicine without confirming with your doctor or pharmacist.</p>
+        <span class="disclaimer-title">⚠️ Mandatory Medical Disclaimer</span>
+        <p class="disclaimer-en">This is price and molecule information only, not medical advice. Do not change any medicine without confirming with your doctor or pharmacist.</p>
         <div class="disclaimer-hindi">
           <strong>अस्वीकरण:</strong> यह केवल दवा की कीमत और साल्ट (सक्रिय घटक) की जानकारी है, चिकित्सीय सलाह नहीं। अपने डॉक्टर या फार्मासिस्ट से पुष्टि किए बिना कोई भी दवा न बदलें।
         </div>
