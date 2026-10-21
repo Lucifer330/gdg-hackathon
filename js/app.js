@@ -5,6 +5,7 @@
  */
 
 import { loadDrugs } from './data.js';
+import { searchNormalized } from './search.js';
 
 let allDrugs = [];
 let isUsingPlaceholder = false;
@@ -74,7 +75,7 @@ export function findExactMatch(drugs, query) {
 }
 
 function executeExactSearch(query) {
-  const match = findExactMatch(allDrugs, query);
+  const match = searchNormalized(allDrugs, query);
 
   if (!match) {
     // Hard Rule 1: Never guess or hallucinate.
@@ -85,7 +86,7 @@ function executeExactSearch(query) {
     return;
   }
 
-  // Found exact match
+  // Found match
   statusCard.style.display = 'none';
   renderResultCard(match);
 }
