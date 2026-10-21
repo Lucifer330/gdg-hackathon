@@ -24,6 +24,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-primary);
@@ -32,6 +38,19 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Accessibility Focus States */
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Active touch feedback for older fingers */
+button:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
 }
 
 /* Banner for placeholder data */
@@ -414,18 +433,14 @@ body {
   font-weight: 500;
 }
 
-  color: var(--text-primary);
-  text-align: right;
-}
-
 /* Disclaimer box */
 .disclaimer-box {
   background: rgba(245, 158, 11, 0.1);
   border: 1px solid rgba(245, 158, 11, 0.5);
   border-radius: var(--radius-md);
-  padding: 12px;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  padding: 14px;
+  font-size: 0.9rem;
+  line-height: 1.45;
   color: #fde68a;
 }
 
@@ -442,3 +457,78 @@ body {
   padding-top: 8px;
   border-top: 1px dashed rgba(245, 158, 11, 0.3);
 }
+
+/* =========================================================
+   Mobile Ergonomics & 360px Breakpoint Optimization
+   Designed for one-handed use, no horizontal scrolling
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 10px 12px 100px;
+    gap: 12px;
+  }
+
+  .savings-headline {
+    font-size: 1.95rem;
+    gap: 8px;
+  }
+
+  .savings-new-price {
+    font-size: 2rem;
+  }
+
+  .savings-old-price {
+    font-size: 1.35rem;
+  }
+
+  .savings-badge-pill {
+    font-size: 0.95rem;
+    padding: 4px 12px;
+  }
+
+  .search-input {
+    font-size: 1.15rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-container {
+    padding: 8px 8px 100px;
+    gap: 10px;
+  }
+
+  .brand-title {
+    font-size: 1.3rem;
+  }
+
+  .savings-headline {
+    font-size: 1.7rem;
+    gap: 6px;
+  }
+
+  .savings-new-price {
+    font-size: 1.75rem;
+  }
+
+  .savings-old-price {
+    font-size: 1.2rem;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .detail-value {
+    text-align: left;
+  }
+
+  .strength-btn {
+    min-width: 80px;
+    padding: 8px 12px;
+    font-size: 1rem;
+  }
+}
+
