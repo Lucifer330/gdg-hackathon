@@ -68,7 +68,16 @@ node tests/search.test.js
    - Ceiling prices fixed under the Drugs (Prices Control) Order (DPCO).
    - [nppa.gov.in](https://www.nppa.gov.in/)
 
-*Note: When demoing or running without full production datasets, a 5-row PLACEHOLDER dataset is provided and clearly badged in the UI.*
+*Note: When demoing or running without full production datasets, a 5-row PLACEHOLDER dataset (`data/drugs.sample.csv`) is provided and clearly badged with a prominent banner in the UI. When you supply `data/drugs.csv`, it is loaded automatically.*
+
+### Building the Production Dataset from Raw Files
+To convert raw government CSV downloads from `data/raw/` into the standardized schema:
+```bash
+python scripts/build_data.py path_to_raw.csv
+# or to scan and process all raw files:
+python scripts/build_data.py --scan
+```
+
 
 ---
 
