@@ -20,7 +20,7 @@ Patients often face:
 
 ---
 
-## Disclaimer / अस्वीकरण
+## Medical Disclaimer / चिकित्सीय अस्वीकरण
 
 > **English:**  
 > **This is price and molecule information only, not medical advice. Do not change any medicine without confirming with your doctor or pharmacist.**
@@ -28,20 +28,48 @@ Patients often face:
 > **हिन्दी:**  
 > **यह केवल दवा की कीमत और साल्ट (सक्रिय घटक) की जानकारी है, चिकित्सीय सलाह नहीं। अपने डॉक्टर या फार्मासिस्ट से पुष्टि किए बिना कोई भी दवा न बदलें।**
 
-*Generic Dawa does not suggest or imply medical substitution decisions. It only surfaces publicly published pricing and active molecule data.*
+*Generic Dawa does not suggest or imply medical substitution decisions. It surfaces publicly published government pricing and active molecule data for patient awareness.*
+
+---
+
+## Key Features
+
+1. **Deterministic Data Engine (Rule 1 & 2)**:
+   - Drug names, molecules, strengths, and prices come **ONLY** from the verified CSV data file.
+   - Zero hallucination: If a medicine is not in the data, the app displays: *"Not in our data. Please ask your doctor or pharmacist."*
+   - Clear banner whenever placeholder demo data (`data/drugs.sample.csv`) is active.
+2. **Robust Fuzzy Matching & Misspelling Tolerance**:
+   - Handles typos, phonetics (e.g. `ogmentin` → `Augmentin`), and omitted vowels via composite Levenshtein and Trigram Jaccard indexing.
+   - Search by commercial brand name or chemical molecule.
+   - Normalizes dosages (`500mg` = `500 mg` = `500MG`).
+   - If strength is missing from query, displays an interactive strength selector (`[40mg]`, `[500mg]`).
+   - Surfaces *"Did you mean"* suggestions when confidence is low.
+3. **Multi-Drug Prescription List & Total Savings**:
+   - Add several medicines to a prescription list.
+   - Calculates aggregate savings: e.g. `₹439 → ₹62.50 (Save ₹376.50 / 86%)`.
+4. **Printable Pharmacy Counter Slip**:
+   - One-click print stylesheet formatted specifically for pharmacy counters.
+   - Includes comparison table, totals, and mandatory bilingual disclaimers.
+5. **Vision OCR: "Scan strip or box" with Gemma 4**:
+   - Optional camera scan to read printed text from medicine strips or boxes.
+   - Strictly constrained: Gemma 4 reads printed characters only. It **NEVER** supplies prices, molecules, or medical advice.
+   - Extracted text is presented to the user to confirm or edit before searching into the deterministic data matcher.
+6. **Bilingual Hindi & English UI**:
+   - One-tap toggle switching all UI labels and guidance without reloading.
+7. **Offline-First PWA (Airplane Mode Ready)**:
+   - Pre-caches HTML, CSS, JavaScript, icons, and CSV data files via Service Worker.
 
 ---
 
 ## How to Run
 
-Generic Dawa uses pure static web technologies (Vanilla HTML, CSS, JavaScript). There is **no build step**, no package bundler, and no backend server required.
+Generic Dawa uses pure static web technologies (Vanilla HTML5, CSS3, ES modules). There is **no build step**, no webpack/vite bundler, and no backend server required.
 
 ### Quick Start (Local Server)
 Because Progressive Web Apps require HTTPS or `localhost` to register Service Workers and load local CSV files via `fetch`, serve the folder with any static HTTP server:
 
-#### Using Python (built-in):
+#### Using Python 3:
 ```bash
-# Python 3
 python -m http.server 8000
 ```
 Then open: [http://localhost:8000](http://localhost:8000)
@@ -51,11 +79,46 @@ Then open: [http://localhost:8000](http://localhost:8000)
 npx serve .
 ```
 
-#### Running Tests:
-Unit tests for the search and normalization algorithms can be executed directly with Node.js:
+---
+
+## How to Test Offline (Airplane Mode)
+
+1. Open [http://localhost:8000](http://localhost:8000) in Chrome, Edge, or mobile browser while connected.
+2. The Service Worker installs automatically and caches all core assets:
+   - `index.html`
+   - `css/styles.css` & `css/print.css`
+   - `js/app.js`, `js/data.js`, `js/search.js`, `js/i18n.js`, `js/cart.js`, `js/vision.js`, `js/config.js`
+   - `data/drugs.sample.csv` (and `data/drugs.csv` if present)
+   - `manifest.webmanifest` & SVG icons
+3. **Test Airplane Mode**:
+   - Disconnect your Wi-Fi, turn on Airplane Mode, or open Chrome DevTools → **Network** tab → check **Offline**.
+   - Reload the page.
+   - Search for `Augmentin`, `Calpol`, `Pan 40`, `Telma`, or `Glycomet`.
+   - The app continues to work with zero latency and full search functionality.
+
+---
+
+## "Scan Strip or Box" (Vision OCR with Gemma 4)
+
+Generic Dawa supports reading printed text from packaging using a local **Gemma 4** vision model.
+
+### Architectural Guardrails
+1. **Model Used**: Gemma 4 vision model (or any local multimodal model served via Ollama).
+2. **Where it Runs**: Local Ollama server (default endpoint: `http://localhost:11434/api/generate`, configurable in `js/config.js`).
+3. **Strict OCR Scope**: The model prompt strictly instructs the model to transcribe printed packaging text only and output `{"candidates": ["..."]}`.
+4. **Hard Security Rule**: Gemma 4 is **never** permitted to supply prices, molecules, strengths, dosages, or substitutions. All medical data comes solely from `data/drugs.csv`.
+5. **User Confirmation**: The extracted text is displayed in an input box for the user to confirm or edit before executing the search.
+6. **Graceful Fallback**: If Ollama is offline, times out (15s), or fails to read the image, the UI cleanly notifies:  
+   *"Could not read the photo. Please type the name."*  
+   Typing remains the primary path that always works.
+
+### Setting Up Local Ollama for Vision:
 ```bash
-node tests/search.test.js
+# 1. Install Ollama from ollama.com
+# 2. Run vision model
+ollama run gemma-4
 ```
+*Note: If Ollama is not running, all other app features (search, fuzzy matching, cart, print slip, offline PWA) continue to work normally.*
 
 ---
 
@@ -68,25 +131,48 @@ node tests/search.test.js
    - Ceiling prices fixed under the Drugs (Prices Control) Order (DPCO).
    - [nppa.gov.in](https://www.nppa.gov.in/)
 
-*Note: When demoing or running without full production datasets, a 5-row PLACEHOLDER dataset (`data/drugs.sample.csv`) is provided and clearly badged with a prominent banner in the UI. When you supply `data/drugs.csv`, it is loaded automatically.*
-
-### Building the Production Dataset from Raw Files
-To convert raw government CSV downloads from `data/raw/` into the standardized schema:
-```bash
-python scripts/build_data.py path_to_raw.csv
-# or to scan and process all raw files:
-python scripts/build_data.py --scan
-```
-
+### Building Production Data (`scripts/build_data.py`)
+To process raw CSV downloads from Jan Aushadhi and NPPA:
+1. Place raw official files into `data/raw/`.
+2. Run the cleaning ETL script:
+   ```bash
+   python scripts/build_data.py path_to_raw.csv
+   # or to scan and process all files in data/raw/:
+   python scripts/build_data.py --scan
+   ```
+3. The script validates column headers, strips non-numeric characters from prices, normalizes units, and outputs `data/drugs.csv`. When `data/drugs.csv` is present, the app automatically switches from the sample dataset to the production dataset.
 
 ---
 
-## Limitations
+## Running the Automated Test Suite
 
-1. **Static Snapshot**: Data reflects published lists as of the record date specified in `source_date` and does not reflect real-time local pharmacy stock or surge pricing.
-2. **Consultation Mandatory**: Bioequivalence must always be evaluated by a certified medical practitioner; salts may have different delivery mechanisms, coatings, or release profiles.
-3. **Combination Drugs & Dosages**: Multi-molecule combination drugs and specialty injectables may not have direct 1:1 Jan Aushadhi equivalents.
-4. **Offline Cache Updates**: The offline cache updates when a new version of the service worker is activated while connected to the internet.
+We maintain comprehensive unit test suites using Node.js without any third-party dependencies:
+
+```bash
+# Run CSV schema validation
+node tests/csv.test.js
+
+# Run search, normalization & 26 misspelling tests
+node tests/search.test.js
+
+# Run bilingual i18n translation coverage test
+node tests/i18n.test.js
+
+# Run multi-drug list calculation tests
+node tests/cart.test.js
+
+# Run Gemma 4 vision OCR parsing & fallback tests
+node tests/vision.test.js
+```
+
+---
+
+## Known Limitations
+
+1. **Sample Dataset**: Until the user adds their official `data/drugs.csv`, the app operates on the 5-row `data/drugs.sample.csv` and displays a red test banner.
+2. **Vision Packaging Glare & Cursive**: Reflective foil on blister strips and doctor cursive handwriting may not be recognized by OCR; users can always type the name directly.
+3. **Local AI Endpoint**: Vision scanning requires a local Ollama instance running at `http://localhost:11434` or configured endpoint.
+4. **Consultation Mandatory**: Salts and generic bioequivalents must always be confirmed by a licensed doctor or pharmacist before changing medication.
 
 ---
 
