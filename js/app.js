@@ -8,6 +8,7 @@ import { loadDrugs } from './data.js';
 import { fuzzySearchDrugs, normalizeText } from './search.js';
 import { initLang, getLang, toggleLang, t } from './i18n.js';
 import { initCart, addToCart, removeFromCart, clearCart, getCartSummary, isInCart, subscribeToCart } from './cart.js';
+import { scanMedicineImage } from './vision.js';
 
 let allDrugs = [];
 let isUsingPlaceholder = false;
@@ -35,6 +36,19 @@ const cartTotalBrand = document.getElementById('cart-total-brand');
 const cartTotalGeneric = document.getElementById('cart-total-generic');
 const cartTotalBadge = document.getElementById('cart-total-badge');
 const cartItemsContainer = document.getElementById('cart-items-container');
+
+// Vision Scan DOM Elements (Step 15)
+const startScanBtn = document.getElementById('start-scan-btn');
+const cameraFileInput = document.getElementById('camera-file-input');
+const scanModal = document.getElementById('scan-modal');
+const closeScanBtn = document.getElementById('close-scan-btn');
+const scanImagePreview = document.getElementById('scan-image-preview');
+const scanStatusIndicator = document.getElementById('scan-status-indicator');
+const scanConfirmationBox = document.getElementById('scan-confirmation-box');
+const confirmedMedicineName = document.getElementById('confirmed-medicine-name');
+const executeScanSearchBtn = document.getElementById('execute-scan-search-btn');
+const scanErrorBox = document.getElementById('scan-error-box');
+const scanFallbackTypeBtn = document.getElementById('scan-fallback-type-btn');
 
 async function init() {
   initLang();
@@ -76,6 +90,20 @@ async function init() {
   if (printSlipBtn) {
     printSlipBtn.addEventListener('click', () => {
       window.print();
+    });
+  }
+
+  // Vision Scan modal listeners (Step 15)
+  if (startScanBtn && cameraFileInput) {
+    startScanBtn.addEventListener('click', () => cameraFileInput.click());
+    cameraFileInput.addEventListener('change', handleImageSelection);
+  }
+  if (closeScanBtn) closeScanBtn.addEventListener('click', closeScanModal);
+  if (executeScanSearchBtn) executeScanSearchBtn.addEventListener('click', handleExecuteScanSearch);
+  if (scanFallbackTypeBtn) scanFallbackTypeBtn.addEventListener('click', handleScanFallbackType);
+  if (scanModal) {
+    scanModal.addEventListener('click', (e) => {
+      if (e.target === scanModal) closeScanModal();
     });
   }
 
@@ -503,6 +531,67 @@ function updatePrintableSlip(summary) {
       <div class="sig-line">Pharmacist Stamp & Signature</div>
     </div>
   `;
+}
+
+// Vision Scan Modal Logic (Step 15)
+async function handleImageSelection(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  if (scanModal) {
+    scanModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  if (scanImagePreview) {
+    scanImagePreview.src = URL.createObjectURL(file);
+    scanImagePreview.classList.remove('hidden');
+  }
+
+  if (scanStatusIndicator) scanStatusIndicator.classList.remove('hidden');
+  if (scanConfirmationBox) scanConfirmationBox.classList.add('hidden');
+  if (scanErrorBox) scanErrorBox.classList.add('hidden');
+
+  const result = await scanMedicineImage(file);
+
+  if (scanStatusIndicator) scanStatusIndicator.classList.add('hidden');
+
+  if (result.success && result.extractedText) {
+    if (scanConfirmationBox && confirmedMedicineName) {
+      confirmedMedicineName.value = result.extractedText;
+      scanConfirmationBox.classList.remove('hidden');
+      confirmedMedicineName.focus();
+    }
+  } else {
+    if (scanErrorBox) {
+      scanErrorBox.classList.remove('hidden');
+    }
+  }
+}
+
+function handleExecuteScanSearch() {
+  const text = confirmedMedicineName ? confirmedMedicineName.value.trim() : '';
+  closeScanModal();
+  if (text) {
+    searchInput.value = text;
+    clearSearchBtn.classList.remove('hidden');
+    executeSearch(text);
+  }
+}
+
+function handleScanFallbackType() {
+  closeScanModal();
+  searchInput.focus();
+}
+
+function closeScanModal() {
+  if (scanModal) {
+    scanModal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+  if (cameraFileInput) {
+    cameraFileInput.value = '';
+  }
 }
 
 function escapeHTML(str) {

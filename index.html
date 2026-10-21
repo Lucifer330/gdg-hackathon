@@ -47,6 +47,14 @@
         >
         <button id="clear-search-btn" class="clear-btn hidden" aria-label="Clear search">✕</button>
       </div>
+
+      <!-- Scan Strip or Box (Step 15) -->
+      <div class="scan-action-row">
+        <input type="file" id="camera-file-input" accept="image/*" capture="environment" class="hidden-file-input" aria-hidden="true">
+        <button id="start-scan-btn" class="scan-strip-btn" aria-label="Scan Medicine Strip or Box">
+          📷 <span data-i18n="scanBtn">Scan Medicine Strip / Box</span>
+        </button>
+      </div>
     </section>
 
     <!-- Results Area -->
@@ -100,6 +108,44 @@
           </button>
           <button id="clear-cart-btn" class="action-btn clear-list-btn" data-i18n="clearListBtn">
             Clear List
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Strip / Box Confirmation Modal (Step 15) -->
+    <div id="scan-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="scan-modal-title">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="scan-modal-title" data-i18n="scanModalTitle">Scan Medicine Strip / Box</h2>
+          <button id="close-scan-btn" class="close-modal-btn" aria-label="Close">✕</button>
+        </div>
+
+        <div class="scan-preview-wrapper">
+          <img id="scan-image-preview" class="scan-preview-img hidden" alt="Medicine photo preview">
+        </div>
+
+        <div id="scan-status-indicator" class="status-card">
+          <div class="loading-pulse">⏳</div>
+          <span data-i18n="scanReading">Reading printed text with vision model...</span>
+        </div>
+
+        <div id="scan-confirmation-box" class="scan-confirm-group hidden">
+          <label for="confirmed-medicine-name" class="scan-confirm-label" data-i18n="scanConfirmPrompt">
+            Confirm or edit extracted text before searching:
+          </label>
+          <div class="search-box-wrapper" style="margin-top: 6px;">
+            <input type="text" id="confirmed-medicine-name" class="search-input" autocomplete="off" autocorrect="off">
+          </div>
+          <button id="execute-scan-search-btn" class="action-btn print-btn" style="margin-top: 10px; width: 100%;">
+            🔍 <span data-i18n="scanSearchBtn">Search Confirmed Name</span>
+          </button>
+        </div>
+
+        <div id="scan-error-box" class="status-card error hidden">
+          <div id="scan-error-msg" data-i18n="scanError">Could not read the photo. Please type the name.</div>
+          <button id="scan-fallback-type-btn" class="action-btn clear-list-btn" style="margin-top:10px; width:100%;">
+            ✏️ Type Medicine Name
           </button>
         </div>
       </div>

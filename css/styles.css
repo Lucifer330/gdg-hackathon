@@ -713,6 +713,81 @@ button:active {
   display: none;
 }
 
+/* Scan Strip or Box Actions (Step 15) */
+.scan-action-row {
+  margin-top: 8px;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.scan-strip-btn {
+  width: 100%;
+  min-height: 48px;
+  background: var(--bg-surface);
+  border: 1px dashed var(--accent-blue);
+  border-radius: var(--radius-md);
+  color: var(--accent-blue);
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.scan-strip-btn:active {
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.scan-preview-wrapper {
+  text-align: center;
+  max-height: 160px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.scan-preview-img {
+  max-height: 150px;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  object-fit: contain;
+}
+
+.scan-preview-img.hidden {
+  display: none;
+}
+
+.loading-pulse {
+  font-size: 2rem;
+  animation: pulse 1s infinite alternate;
+  margin-bottom: 6px;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+.scan-confirm-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scan-confirm-group.hidden {
+  display: none;
+}
+
+.scan-confirm-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
 /* Mobile Ergonomics & 360px Breakpoint Optimization
    Designed for one-handed use, no horizontal scrolling
    ========================================================= */
