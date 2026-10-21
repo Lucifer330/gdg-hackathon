@@ -14,7 +14,7 @@
 <body>
 
   <!-- Test Data Warning Banner (Rule 2) -->
-  <aside id="placeholder-banner" class="placeholder-banner hidden" role="alert">
+  <aside id="placeholder-banner" class="placeholder-banner hidden" role="alert" data-i18n="placeholderBanner">
     ⚠️ DEMO / PLACEHOLDER DATA LOADED (data/drugs.sample.csv). Prices and items are for testing only.
   </aside>
 
@@ -22,8 +22,8 @@
     <!-- Header -->
     <header class="app-header">
       <h1 class="brand-title">
-        Generic Dawa
-        <span class="badge">जन औषधि</span>
+        <span data-i18n="appTitle">Generic Dawa</span>
+        <span class="badge" data-i18n="appBadge">जन औषधि</span>
       </h1>
       <button id="lang-toggle-btn" class="lang-toggle" aria-label="Toggle Language">
         हिन्दी
@@ -50,8 +50,8 @@
 
     <!-- Results Area -->
     <section id="results-area" class="results-section" aria-live="polite">
-      <div id="status-card" class="status-card">
-        Type medicine brand name to check generic price and savings.
+      <div id="status-card" class="status-card" data-i18n="initialStatus">
+        Type medicine brand name or molecule to check generic price and savings.
       </div>
       <div id="result-container"></div>
     </section>

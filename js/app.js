@@ -1,14 +1,16 @@
 /**
  * js/app.js
  * Main application script for Generic Dawa.
- * Handles search, fuzzy matching, candidate ranking, and result rendering.
+ * Handles search, fuzzy matching, candidate ranking, bilingual i18n, and result rendering.
  */
 
 import { loadDrugs } from './data.js';
 import { fuzzySearchDrugs, normalizeText } from './search.js';
+import { initLang, getLang, toggleLang, t } from './i18n.js';
 
 let allDrugs = [];
 let isUsingPlaceholder = false;
+let currentSearchQuery = '';
 
 // DOM Elements
 const searchInput = document.getElementById('search-input');
@@ -16,8 +18,12 @@ const clearSearchBtn = document.getElementById('clear-search-btn');
 const placeholderBanner = document.getElementById('placeholder-banner');
 const statusCard = document.getElementById('status-card');
 const resultContainer = document.getElementById('result-container');
+const langToggleBtn = document.getElementById('lang-toggle-btn');
 
 async function init() {
+  initLang();
+  applyTranslations();
+
   try {
     const data = await loadDrugs();
     allDrugs = data.drugs;
@@ -30,12 +36,13 @@ async function init() {
     }
   } catch (err) {
     statusCard.className = 'status-card error';
-    statusCard.textContent = 'Failed to load medicine database. Please refresh.';
+    statusCard.textContent = t('errorDataLoad');
   }
 
   // Setup search input listeners
   searchInput.addEventListener('input', handleSearchInput);
   clearSearchBtn.addEventListener('click', clearSearch);
+  langToggleBtn.addEventListener('click', handleLangToggle);
 
   // Register Service Worker for offline-first PWA
   if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
@@ -45,18 +52,51 @@ async function init() {
   }
 }
 
+function handleLangToggle() {
+  toggleLang();
+  applyTranslations();
+  if (currentSearchQuery) {
+    executeSearch(currentSearchQuery);
+  }
+}
+
+function applyTranslations() {
+  // Update static elements with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key) {
+      el.textContent = t(key);
+    }
+  });
+
+  // Update input placeholder and toggle button
+  if (searchInput) {
+    searchInput.placeholder = t('searchPlaceholder');
+  }
+  if (langToggleBtn) {
+    langToggleBtn.textContent = t('toggleLangLabel');
+  }
+
+  // Update initial status card if empty
+  if (!currentSearchQuery && statusCard && !statusCard.classList.contains('error')) {
+    statusCard.textContent = t('initialStatus');
+  }
+}
+
 function clearSearch() {
   searchInput.value = '';
+  currentSearchQuery = '';
   clearSearchBtn.classList.add('hidden');
   resultContainer.innerHTML = '';
   statusCard.className = 'status-card';
   statusCard.style.display = 'block';
-  statusCard.textContent = 'Type medicine brand name or molecule to check generic price and savings.';
+  statusCard.textContent = t('initialStatus');
   searchInput.focus();
 }
 
 function handleSearchInput() {
   const query = searchInput.value.trim();
+  currentSearchQuery = query;
 
   if (query.length > 0) {
     clearSearchBtn.classList.remove('hidden');
@@ -77,7 +117,7 @@ export function executeSearch(query) {
     // Hard Rule 1: Never guess or hallucinate.
     statusCard.className = 'status-card error';
     statusCard.style.display = 'block';
-    statusCard.textContent = 'Not in our data. Please ask your doctor or pharmacist.';
+    statusCard.textContent = t('errorNotFound');
     resultContainer.innerHTML = '';
     return;
   }
@@ -93,7 +133,7 @@ export function executeSearch(query) {
 
   // If confidence is medium, show "Did you mean?" suggestions box
   if (confidence === 'medium' && candidates.length > 1) {
-    html += renderSuggestions(candidates, 'Did you mean:');
+    html += renderSuggestions(candidates, t('didYouMeanTitle'));
   }
 
   // Render primary result card
@@ -105,7 +145,7 @@ export function executeSearch(query) {
   if (confidence === 'high' && candidates.length > 1) {
     const otherCandidates = candidates.filter(c => c.drug !== topMatch && c.score >= 0.65);
     if (otherCandidates.length > 0) {
-      html += renderSuggestions(otherCandidates, 'Other matching medicines:');
+      html += renderSuggestions(otherCandidates, t('otherMatchesTitle'));
     }
   }
 
@@ -117,7 +157,7 @@ export function executeSearch(query) {
 function renderStrengthPicker(variants) {
   return `
     <div class="strength-picker" role="region" aria-label="Available Strengths">
-      <div class="strength-picker-title">⚡ Select Strength / पावर चुनें:</div>
+      <div class="strength-picker-title">⚡ ${escapeHTML(t('selectStrengthTitle'))}</div>
       <div class="strength-buttons-grid">
         ${variants.map(v => `
           <button type="button" class="strength-btn" data-brand="${escapeHTML(v.brand_name)}">
@@ -129,21 +169,6 @@ function renderStrengthPicker(variants) {
     </div>
   `;
 }
-
-function bindStrengthButtonEvents() {
-  const buttons = resultContainer.querySelectorAll('.strength-btn');
-  buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const brand = btn.getAttribute('data-brand');
-      if (brand) {
-        searchInput.value = brand;
-        clearSearchBtn.classList.remove('hidden');
-        executeSearch(brand);
-      }
-    });
-  });
-}
-
 
 function renderSuggestions(candidates, title) {
   return `
@@ -168,6 +193,22 @@ function bindSuggestionEvents() {
       const brand = pill.getAttribute('data-brand');
       if (brand) {
         searchInput.value = brand;
+        currentSearchQuery = brand;
+        clearSearchBtn.classList.remove('hidden');
+        executeSearch(brand);
+      }
+    });
+  });
+}
+
+function bindStrengthButtonEvents() {
+  const buttons = resultContainer.querySelectorAll('.strength-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const brand = btn.getAttribute('data-brand');
+      if (brand) {
+        searchInput.value = brand;
+        currentSearchQuery = brand;
         clearSearchBtn.classList.remove('hidden');
         executeSearch(brand);
       }
@@ -187,7 +228,7 @@ function buildResultCardHTML(drug) {
           <span class="savings-new-price" aria-label="Jan Aushadhi Price">₹${drug.generic_price_inr.toFixed(2)}</span>
         </div>
         <div class="savings-badge-pill">
-          ⚡ SAVE ₹${drug.savings_inr.toFixed(2)} (${drug.savings_pct}%)
+          ⚡ ${escapeHTML(t('saveHeadlinePrefix'))} ₹${drug.savings_inr.toFixed(2)} (${drug.savings_pct}%)
         </div>
       </div>
 
@@ -200,31 +241,31 @@ function buildResultCardHTML(drug) {
       <!-- Key Details Grid -->
       <div class="drug-details">
         <div class="detail-row">
-          <span class="detail-label">Active Molecule / Salt</span>
+          <span class="detail-label">${escapeHTML(t('moleculeLabel'))}</span>
           <span class="detail-value highlight">${escapeHTML(drug.molecule)}</span>
         </div>
         ${drug.brand_manufacturer ? `
         <div class="detail-row">
-          <span class="detail-label">Brand Manufacturer</span>
+          <span class="detail-label">${escapeHTML(t('manufacturerLabel'))}</span>
           <span class="detail-value">${escapeHTML(drug.brand_manufacturer)}</span>
         </div>` : ''}
         <div class="detail-row">
-          <span class="detail-label">Jan Aushadhi Generic</span>
+          <span class="detail-label">${escapeHTML(t('genericProductLabel'))}</span>
           <span class="detail-value generic-name">${escapeHTML(drug.generic_name)}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">Packaging / Units</span>
+          <span class="detail-label">${escapeHTML(t('formPackLabel'))}</span>
           <span class="detail-value">${escapeHTML(drug.pack_size)}</span>
         </div>
         <div class="detail-row">
-          <span class="detail-label">Price Source & Date</span>
+          <span class="detail-label">${escapeHTML(t('sourceDateLabel'))}</span>
           <span class="detail-value source-tag">${escapeHTML(drug.source)} (${escapeHTML(drug.source_date)})</span>
         </div>
       </div>
 
-      <!-- Mandatory Medical Disclaimer (Rule 3) -->
+      <!-- Mandatory Medical Disclaimer (Rule 3 in both English & Hindi) -->
       <div class="disclaimer-box" role="note">
-        <span class="disclaimer-title">⚠️ Mandatory Medical Disclaimer</span>
+        <span class="disclaimer-title">${escapeHTML(t('disclaimerHeader'))}</span>
         <p class="disclaimer-en">This is price and molecule information only, not medical advice. Do not change any medicine without confirming with your doctor or pharmacist.</p>
         <div class="disclaimer-hindi">
           <strong>अस्वीकरण:</strong> यह केवल दवा की कीमत और साल्ट (सक्रिय घटक) की जानकारी है, चिकित्सीय सलाह नहीं। अपने डॉक्टर या फार्मासिस्ट से पुष्टि किए बिना कोई भी दवा न बदलें।
