@@ -1,11 +1,11 @@
 /**
  * js/app.js
  * Main application script for Generic Dawa.
- * Step 4: Data loading and exact matching.
+ * Handles search, fuzzy matching, candidate ranking, and result rendering.
  */
 
 import { loadDrugs } from './data.js';
-import { searchNormalized } from './search.js';
+import { fuzzySearchDrugs, normalizeText } from './search.js';
 
 let allDrugs = [];
 let isUsingPlaceholder = false;
@@ -44,7 +44,7 @@ function clearSearch() {
   resultContainer.innerHTML = '';
   statusCard.className = 'status-card';
   statusCard.style.display = 'block';
-  statusCard.textContent = 'Type medicine brand name to check generic price and savings.';
+  statusCard.textContent = 'Type medicine brand name or molecule to check generic price and savings.';
   searchInput.focus();
 }
 
@@ -59,25 +59,14 @@ function handleSearchInput() {
     return;
   }
 
-  executeExactSearch(query);
+  executeSearch(query);
 }
 
-/**
- * Step 4 Exact Match Implementation
- */
-export function findExactMatch(drugs, query) {
-  const cleanQuery = query.toLowerCase().trim();
-  if (!cleanQuery) return null;
+export function executeSearch(query) {
+  const searchResult = fuzzySearchDrugs(allDrugs, query);
+  const { topMatch, confidence, candidates, strengthVariants } = searchResult;
 
-  return drugs.find(d => 
-    d.brand_name.toLowerCase().trim() === cleanQuery
-  ) || null;
-}
-
-function executeExactSearch(query) {
-  const match = searchNormalized(allDrugs, query);
-
-  if (!match) {
+  if (confidence === 'none' || (!topMatch && (!strengthVariants || strengthVariants.length === 0))) {
     // Hard Rule 1: Never guess or hallucinate.
     statusCard.className = 'status-card error';
     statusCard.style.display = 'block';
@@ -86,14 +75,102 @@ function executeExactSearch(query) {
     return;
   }
 
-  // Found match
   statusCard.style.display = 'none';
-  renderResultCard(match);
+
+  let html = '';
+
+  // Step 7: If multiple strengths are available (e.g. user didn't specify strength), show strength picker
+  if (strengthVariants && strengthVariants.length > 1) {
+    html += renderStrengthPicker(strengthVariants);
+  }
+
+  // If confidence is medium, show "Did you mean?" suggestions box
+  if (confidence === 'medium' && candidates.length > 1) {
+    html += renderSuggestions(candidates, 'Did you mean:');
+  }
+
+  // Render primary result card
+  if (topMatch) {
+    html += buildResultCardHTML(topMatch);
+  }
+
+  // If high confidence and multiple matching candidates exist, show other matches
+  if (confidence === 'high' && candidates.length > 1) {
+    const otherCandidates = candidates.filter(c => c.drug !== topMatch && c.score >= 0.65);
+    if (otherCandidates.length > 0) {
+      html += renderSuggestions(otherCandidates, 'Other matching medicines:');
+    }
+  }
+
+  resultContainer.innerHTML = html;
+  bindSuggestionEvents();
+  bindStrengthButtonEvents();
 }
 
-function renderResultCard(drug) {
+function renderStrengthPicker(variants) {
+  return `
+    <div class="strength-picker" role="region" aria-label="Available Strengths">
+      <div class="strength-picker-title">⚡ Select Strength / पावर चुनें:</div>
+      <div class="strength-buttons-grid">
+        ${variants.map(v => `
+          <button type="button" class="strength-btn" data-brand="${escapeHTML(v.brand_name)}">
+            <span>${escapeHTML(v.strength)}</span>
+            <span class="btn-sub">${escapeHTML(v.brand_name)}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function bindStrengthButtonEvents() {
+  const buttons = resultContainer.querySelectorAll('.strength-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const brand = btn.getAttribute('data-brand');
+      if (brand) {
+        searchInput.value = brand;
+        clearSearchBtn.classList.remove('hidden');
+        executeSearch(brand);
+      }
+    });
+  });
+}
+
+
+function renderSuggestions(candidates, title) {
+  return `
+    <div class="suggestions-panel" role="region" aria-label="Suggestions">
+      <div class="suggestions-title">💡 ${escapeHTML(title)}</div>
+      <div class="suggestions-list">
+        ${candidates.map(c => `
+          <button type="button" class="suggestion-pill" data-brand="${escapeHTML(c.drug.brand_name)}">
+            <span>${escapeHTML(c.drug.brand_name)}</span>
+            <span class="pill-sub">(${escapeHTML(c.drug.strength)})</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function bindSuggestionEvents() {
+  const pills = resultContainer.querySelectorAll('.suggestion-pill');
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const brand = pill.getAttribute('data-brand');
+      if (brand) {
+        searchInput.value = brand;
+        clearSearchBtn.classList.remove('hidden');
+        executeSearch(brand);
+      }
+    });
+  });
+}
+
+function buildResultCardHTML(drug) {
   // Hard Rule 3: Always show disclaimer on result screen in Hindi and English
-  const html = `
+  return `
     <article class="result-card" role="region" aria-label="Medicine Comparison">
       <div class="savings-banner">
         <div class="savings-headline">
@@ -147,8 +224,6 @@ function renderResultCard(drug) {
       </div>
     </article>
   `;
-
-  resultContainer.innerHTML = html;
 }
 
 function escapeHTML(str) {
@@ -161,7 +236,6 @@ function escapeHTML(str) {
     .replace(/'/g, '&#39;');
 }
 
-// Auto-run when DOM is loaded
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', init);
 }
