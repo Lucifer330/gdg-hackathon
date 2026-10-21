@@ -708,6 +708,11 @@ button:active {
   border: 1px solid #475569;
 }
 
+/* Screen hide printable slip */
+.printable-slip-area {
+  display: none;
+}
+
 /* Mobile Ergonomics & 360px Breakpoint Optimization
    Designed for one-handed use, no horizontal scrolling
    ========================================================= */

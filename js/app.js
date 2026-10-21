@@ -411,6 +411,98 @@ function updateCartUI(summary) {
       });
     }
   }
+
+  // Update printable prescription slip for pharmacy counter
+  updatePrintableSlip(summary);
+}
+
+function updatePrintableSlip(summary) {
+  const printableArea = document.getElementById('printable-slip');
+  if (!printableArea) return;
+
+  if (summary.count === 0) {
+    printableArea.innerHTML = `
+      <div class="printable-header">
+        <div>
+          <h1>Generic Dawa | जेनेरिक दवा</h1>
+          <div class="slip-subtitle">Jan Aushadhi Medicine Cost Comparison Slip</div>
+        </div>
+        <div class="slip-meta">Date: ${new Date().toLocaleDateString('en-IN')}</div>
+      </div>
+      <p style="text-align: center; color: #666; margin: 30pt 0;">No medicines in prescription list. Please search and add medicines to generate slip.</p>
+    `;
+    return;
+  }
+
+  const dateStr = new Date().toLocaleString('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+  });
+
+  printableArea.innerHTML = `
+    <div class="printable-header">
+      <div>
+        <h1>Generic Dawa | जेनेरिक दवा</h1>
+        <div class="slip-subtitle">Jan Aushadhi Generic Cost Comparison Slip (काउंटर पर्ची)</div>
+      </div>
+      <div class="slip-meta">
+        <div><strong>Date & Time:</strong> ${escapeHTML(dateStr)}</div>
+        <div><strong>Total Medicines:</strong> ${summary.count}</div>
+      </div>
+    </div>
+
+    <div class="print-savings-box">
+      <div>Estimated Price Comparison: <strong>₹${summary.totalBrand.toFixed(2)}</strong> → <strong>₹${summary.totalGeneric.toFixed(2)}</strong></div>
+      <div class="big-savings">TOTAL ESTIMATED SAVING: ₹${summary.totalSavings.toFixed(2)} (${summary.totalSavingsPct}%)</div>
+    </div>
+
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Prescribed Brand</th>
+          <th>Strength</th>
+          <th>Generic Molecule / Salt</th>
+          <th>Jan Aushadhi Product</th>
+          <th style="text-align:right;">Brand MRP (₹)</th>
+          <th style="text-align:right;">Generic MRP (₹)</th>
+          <th style="text-align:right;">Saving (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${summary.items.map((item, idx) => `
+          <tr>
+            <td>${idx + 1}</td>
+            <td><strong>${escapeHTML(item.brand_name)}</strong></td>
+            <td>${escapeHTML(item.strength)}</td>
+            <td>${escapeHTML(item.molecule)}</td>
+            <td>${escapeHTML(item.generic_name)}</td>
+            <td class="num">₹${item.brand_price_inr.toFixed(2)}</td>
+            <td class="num">₹${item.generic_price_inr.toFixed(2)}</td>
+            <td class="num" style="color:#15803d;">₹${(item.brand_price_inr - item.generic_price_inr).toFixed(2)}</td>
+          </tr>
+        `).join('')}
+        <tr class="total-row">
+          <td colspan="5" style="text-align:right;"><strong>TOTAL:</strong></td>
+          <td class="num">₹${summary.totalBrand.toFixed(2)}</td>
+          <td class="num">₹${summary.totalGeneric.toFixed(2)}</td>
+          <td class="num" style="color:#15803d;">₹${summary.totalSavings.toFixed(2)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Mandatory Medical Disclaimer (Rule 3) -->
+    <div class="print-disclaimer">
+      <strong>⚠️ MANDATORY MEDICAL DISCLAIMER / चिकित्सीय अस्वीकरण</strong>
+      <div><strong>English:</strong> This is price and molecule information only, not medical advice. Do not change any medicine without confirming with your doctor or pharmacist.</div>
+      <div style="margin-top: 4pt;"><strong>हिन्दी:</strong> यह केवल दवा की कीमत और साल्ट (सक्रिय घटक) की जानकारी है, चिकित्सीय सलाह नहीं। अपने डॉक्टर या फार्मासिस्ट से पुष्टि किए बिना कोई भी दवा न बदलें।</div>
+    </div>
+
+    <div class="print-footer-sig">
+      <div class="sig-line">Patient / Customer Signature</div>
+      <div class="sig-line">Pharmacist Stamp & Signature</div>
+    </div>
+  `;
 }
 
 function escapeHTML(str) {
